@@ -1,0 +1,51 @@
+
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Gacha Sim</title>
+<style>
+body{font-family:Arial;background:#20243a;color:#fff;text-align:center}
+button{padding:10px 18px;margin:6px;font-size:16px}
+#results{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.card{width:120px;padding:8px;border-radius:10px}
+.r2{background:#666}.r3{background:#3b82f6}.r4{background:#f59e0b;color:#111;box-shadow:0 0 15px gold}
+</style></head><body>
+<h1>Project SEKAI-style Gacha (Placeholder)</h1>
+<p>Pity: <span id=pity>0</span>/50 | Gems aren't tracked</p>
+<button onclick="pull(1)">Single Pull</button>
+<button onclick="pull(10)">Ten Pull</button>
+<h2>Results</h2><div id=results></div>
+<h2>Inventory</h2><div id=inv></div>
+<script>
+const cards=[];
+for(let i=1;i<=20;i++)cards.push({name:"(2★ Card "+i+")",r:2});
+for(let i=1;i<=12;i++)cards.push({name:"(3★ Card "+i+")",r:3});
+for(let i=1;i<=8;i++)cards.push({name:"(4★ Card "+i+")",r:4});
+let pity=+localStorage.pity||0;
+let inv=JSON.parse(localStorage.inv||"{}");
+function save(){localStorage.pity=pity;localStorage.inv=JSON.stringify(inv);}
+function pick(min3){
+ if(pity>=50){pity=0;return rand(4);}
+ let x=Math.random();
+ let r=min3?(x<0.261?4:3):(x<0.03?4:x<0.115?3:2);
+ if(r==4)pity=0; else pity++;
+ return rand(r);
+}
+function rand(r){let a=cards.filter(c=>c.r==r);return a[Math.floor(Math.random()*a.length)]}
+function pull(n){
+ results.innerHTML="";
+ for(let i=0;i<n;i++){
+   let c=pick(n==10&&i==9);
+   inv[c.name]=(inv[c.name]||0)+1;
+   let d=document.createElement("div");
+   d.className="card r"+c.r;
+   d.innerHTML="<h3>"+c.r+"★</h3><p>"+c.name+"</p>";
+   results.appendChild(d);
+ }
+ save();render();
+}
+function render(){
+ pityEl=document.getElementById("pity"); pityEl.textContent=pity;
+ let s="<ul style='display:inline-block;text-align:left'>";
+ Object.keys(inv).sort().forEach(k=>s+="<li>"+k+" ×"+inv[k]+"</li>");
+ inv.innerHTML=s+"</ul>";
+}
+render();
+</script></body></html>
